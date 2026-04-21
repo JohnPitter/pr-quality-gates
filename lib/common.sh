@@ -12,6 +12,10 @@ source "$(dirname "${BASH_SOURCE[0]}")/baseline.sh"
 # shellcheck source=./categories.sh
 source "$(dirname "${BASH_SOURCE[0]}")/categories.sh"
 
+# Load exemption helpers (plugin defaults + project-local overrides)
+# shellcheck source=./exemptions.sh
+source "$(dirname "${BASH_SOURCE[0]}")/exemptions.sh"
+
 # PLUGIN_DIR convenience (2 levels up from lib/common.sh)
 PLUGIN_DIR="${PLUGIN_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 export PLUGIN_DIR
