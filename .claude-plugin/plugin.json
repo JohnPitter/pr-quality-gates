@@ -1,6 +1,6 @@
 {
   "name": "pr-quality-gates",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "101-gate PR validation for Go across 16 categories including api, infrastructure, documentation, git-hygiene, and ai-ml.",
   "author": {
     "name": "JohnPitter",
