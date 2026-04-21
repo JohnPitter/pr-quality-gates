@@ -21,10 +21,17 @@ baseline_mode_active() {
   [ "${PR_QUALITY_BASELINE:-0}" = "1" ]
 }
 
-# Returns 0 if a baseline file exists for the given gate.
+# Returns 0 if PR_QUALITY_FULL=1 (ignore baseline, audit everything).
+baseline_ignored() {
+  [ "${PR_QUALITY_FULL:-0}" = "1" ]
+}
+
+# Returns 0 if a baseline file exists for the given gate AND
+# the caller hasn't asked to ignore it.
 # Usage: baseline_exists "ccn"
 baseline_exists() {
   local gate="$1"
+  baseline_ignored && return 1
   [ -f "$BASELINE_DIR/$gate.txt" ]
 }
 
@@ -46,6 +53,12 @@ baseline_capture() {
 baseline_filter() {
   local gate="$1"
   local baseline_file="$BASELINE_DIR/$gate.txt"
+
+  # Full-audit mode: ignore baseline, report everything.
+  if baseline_ignored; then
+    cut -f2-
+    return
+  fi
 
   if [ ! -f "$baseline_file" ]; then
     # No baseline -> everything is a violation

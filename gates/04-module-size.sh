@@ -53,7 +53,11 @@ TOTAL_COUNT="$(printf '%s' "$RAW" | grep -c . || true)"
 if [ -n "$NEW_VIOLATIONS" ]; then
   NEW_COUNT="$(echo "$NEW_VIOLATIONS" | wc -l | tr -d ' ')"
   BASELINED_COUNT="$((TOTAL_COUNT - NEW_COUNT))"
-  echo "[gate:$GATE] FAIL - $NEW_COUNT novo(s) arquivo(s) acima de $MAX linhas (ignorados $BASELINED_COUNT do baseline):"
+  if baseline_ignored; then
+    echo "[gate:$GATE] FAIL - $NEW_COUNT arquivo(s) acima de $MAX linhas (baseline ignorado - full audit):"
+  else
+    echo "[gate:$GATE] FAIL - $NEW_COUNT novo(s) arquivo(s) acima de $MAX linhas (ignorados $BASELINED_COUNT do baseline):"
+  fi
   echo "$NEW_VIOLATIONS" | sed 's/^/  /'
   exit 1
 fi

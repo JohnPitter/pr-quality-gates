@@ -50,7 +50,11 @@ if [ -n "$NEW_VIOLATIONS" ]; then
   NEW_COUNT="$(echo "$NEW_VIOLATIONS" | wc -l | tr -d ' ')"
   TOTAL_COUNT="$(echo "$RAW" | wc -l | tr -d ' ')"
   BASELINED_COUNT="$((TOTAL_COUNT - NEW_COUNT))"
-  echo "[gate:$GATE] FAIL - $NEW_COUNT nova(s) funcao(oes) acima de CCN $THRESHOLD (ignoradas $BASELINED_COUNT do baseline):"
+  if baseline_ignored; then
+    echo "[gate:$GATE] FAIL - $NEW_COUNT funcao(oes) acima de CCN $THRESHOLD (baseline ignorado - full audit):"
+  else
+    echo "[gate:$GATE] FAIL - $NEW_COUNT nova(s) funcao(oes) acima de CCN $THRESHOLD (ignoradas $BASELINED_COUNT do baseline):"
+  fi
   echo "$NEW_VIOLATIONS"
   exit 1
 fi

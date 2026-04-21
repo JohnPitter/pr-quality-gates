@@ -6,7 +6,7 @@
 
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-E8622C?style=flat-square)](https://claude.com/claude-code)
-[![Version](https://img.shields.io/badge/Version-0.2.1-2D8E5E?style=flat-square)](#)
+[![Version](https://img.shields.io/badge/Version-0.2.2-2D8E5E?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)](#license)
 
 [Features](#features) · [Como Funciona](#como-funciona) · [Instalação](#instalação) · [Configuração](#configuração) · [Gates](#gates) · [Roadmap](#roadmap)
@@ -319,6 +319,33 @@ Isso cria `.pr-quality-gates-baseline/` com um arquivo por gate. **Commite esse 
 5. Cada PR de refactor **reduz** o baseline (remover linhas correspondentes do `.txt`)
 6. CI garante que ninguém **adiciona** ao baseline
 
+### Full Audit — ver a dívida total
+
+Quando você quer ver **tudo** (não só violações novas), use:
+
+```
+/pr-quality-gates:full-audit
+```
+
+Ou manualmente:
+
+```bash
+PR_QUALITY_FULL=1 bash hooks/pr-check.sh
+```
+
+O baseline é ignorado — todas as violações aparecem. Útil para:
+- Planejar sprints de refactor (saber quais arquivos/funções priorizar)
+- Ver o tamanho real da dívida técnica
+- Validar se o baseline ainda reflete a realidade após big changes
+
+### Resumo dos 3 modos
+
+| Modo | Env var | Comando | Quando usar |
+|---|---|---|---|
+| **PR check** (default) | — | `/quality-report` | Dia-a-dia: só falha em violações novas |
+| **Freeze** | `PR_QUALITY_BASELINE=1` | `/baseline-freeze` | Primeira adoção ou após grande refactor |
+| **Full audit** | `PR_QUALITY_FULL=1` | `/full-audit` | Planejamento de débito técnico |
+
 ---
 
 ## Estrutura
@@ -348,6 +375,7 @@ pr-quality-gates/
   commands/
     quality-report.md          # slash command /quality-report
     baseline-freeze.md         # slash command /baseline-freeze
+    full-audit.md              # slash command /full-audit
   .github/workflows/
     pr-check.yml               # GitHub Actions
 ```
