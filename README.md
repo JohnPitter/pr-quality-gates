@@ -2,11 +2,11 @@
 
 # PR Quality Gates
 
-**67 gates de qualidade, segurança, arquitetura, performance e confiabilidade para projetos Go — organizados em 11 categorias com filtro seletivo.**
+**101 gates de qualidade, segurança, arquitetura, performance, confiabilidade, API, infraestrutura, documentação, git e AI/ML para projetos Go — organizados em 16 categorias com filtro seletivo.**
 
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-E8622C?style=flat-square)](https://claude.com/claude-code)
-[![Version](https://img.shields.io/badge/Version-0.3.0-2D8E5E?style=flat-square)](#)
+[![Version](https://img.shields.io/badge/Version-0.4.0-2D8E5E?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)](#license)
 
 [Features](#features) · [Categorias](#categorias) · [Como Funciona](#como-funciona) · [Instalação](#instalação) · [Uso](#uso) · [Roadmap](#roadmap)
@@ -17,9 +17,9 @@
 
 ## O que é o PR Quality Gates?
 
-Plugin do Claude Code que roda **67 gates determinísticos** contra um projeto Go, organizados em **11 categorias**. Você escolhe quais categorias rodar — desde `core` (23 gates críticos, ~3-8k tokens) até `all` (67 gates, ~10-30k tokens).
+Plugin do Claude Code que roda **101 gates determinísticos** contra um projeto Go, organizados em **16 categorias**. Você escolhe quais categorias rodar — desde `core` (23 gates críticos, ~3-8k tokens) até `all` (101 gates, ~15-40k tokens).
 
-**Sem LLM no caminho crítico:** as métricas são medidas por ferramentas reais (gosec, govulncheck, gitleaks, gocyclo, gremlins, errcheck, contextcheck, errorlint, bodyclose, fieldalignment, etc). O Claude só entra pra explicar violações e sugerir refactors.
+**Sem LLM no caminho crítico:** as métricas são medidas por ferramentas reais (gosec, govulncheck, gitleaks, errorlint, contextcheck, bodyclose, fieldalignment, hadolint, actionlint, buf, tfsec, revive, e análises customizadas). O Claude só entra pra explicar violações e sugerir refactors.
 
 **Baseline-aware:** em projetos legados, congele o estado atual e deixe o plugin falhar só em violações novas.
 
@@ -27,25 +27,25 @@ Plugin do Claude Code que roda **67 gates determinísticos** contra um projeto G
 
 ## Aviso de custo de token
 
-O plugin roda ferramentas localmente (custo zero), mas a saída é consumida pelo Claude no `/quality-report` e similares. Planeje:
+O plugin roda ferramentas localmente (custo zero), mas a saída é consumida pelo Claude. Planeje:
 
 | Comando | Gates rodados | Tokens aproximados |
 |---|---|---|
 | `/pr-quality-gates:quality-report` | 23 (core) | **3-8k** |
 | `/pr-quality-gates:category-report <nome>` | 4-15 (1 categoria) | **1-5k** |
-| `/pr-quality-gates:full-audit` | 67 (todos) | **10-30k** |
+| `/pr-quality-gates:full-audit` | 101 (todos) | **15-40k** |
 
-**Recomendação:** use `quality-report` no dia-a-dia, `category-report` para drill-down, e `full-audit` só quando for realmente necessário (audit trimestral, planejamento de refactor).
+**Recomendação:** use `quality-report` no dia-a-dia, `category-report` para drill-down, e `full-audit` só quando realmente necessário (audit trimestral, planejamento de refactor).
 
 ---
 
 ## Categorias
 
-O plugin é organizado em 11 categorias temáticas. Cada gate pertence a exatamente uma categoria.
+16 categorias temáticas. Cada gate pertence a exatamente uma.
 
 | # | Categoria | Gates | O que cobre |
 |---|---|---|---|
-| 1 | **security** | 10 | SAST, supply chain, secrets, deps saudáveis, pinning, SBOM, rate limit, body size, server timeouts, CORS |
+| 1 | **security** | 10 | SAST, supply chain, secrets, maintenance, pinning, SBOM, rate limit, body size, server timeouts, CORS |
 | 2 | **quality** | 4 | CCN, coverage, mutation, module size |
 | 3 | **architecture** | 8 | Coupling (layers/impl), project layout, ISP, DI, error taxonomy, god struct, cohesion, change coupling |
 | 4 | **performance** | 8 | Benchmark regression, escape analysis, struct layout, I/O buffering, GOMAXPROCS, N+1, allocs in loop, sync.Pool |
@@ -56,83 +56,27 @@ O plugin é organizado em 11 categorias temáticas. Cada gate pertence a exatame
 | 9 | **testing** | 5 | Negative paths, fuzz required, timeout tests, goroutine leak tests, property tests |
 | 10 | **compliance** | 4 | Data retention, audit trail, right-to-forget, consent tracking |
 | 11 | **release** | 4 | CHANGELOG, semver, release signing, reproducible build |
+| 12 | **api** ⭐ | 8 | REST status codes, idempotency, OpenAPI spec, versioning, pagination, GraphQL limits, gRPC compat, content negotiation |
+| 13 | **infrastructure** ⭐ | 7 | Dockerfile user, Dockerfile hardening, K8s manifests, K8s security, Terraform (tfsec), GitHub Actions (actionlint), Helm |
+| 14 | **documentation** ⭐ | 6 | README sections, godoc coverage, ADR directory, CONTRIBUTING+SECURITY, link health, runbook |
+| 15 | **git-hygiene** ⭐ | 6 | Conventional commits, PR size, signed commits, no merge commits, large files, branch naming |
+| 16 | **ai-ml** ⭐ | 7 | Prompt injection, LLM timeout, model pinning, PII in prompts, rate limit, response validation, cost tracking |
+
+⭐ = novo em v0.4.0
 
 ### Presets
 
 - **`core`** = security + reliability + quality (23 gates) — **default em pre-commit**
-- **`all`** = todas as 11 categorias (67 gates) — **default em CI**
-- Qualquer combinação via `PR_QUALITY_CATEGORIES=security,reliability,performance`
+- **`all`** = todas as 16 categorias (101 gates) — **default em CI**
+- Qualquer combinação via `PR_QUALITY_CATEGORIES=security,reliability,api,ai-ml`
 
 ### Cobertura das regras
 
-Cada gate tem cobertura marcada no header:
-- **`FULL`** — usa ferramenta OSS consagrada (gosec, gremlins, etc). Baixo falso positivo.
+Cada gate marca a cobertura no header:
+- **`FULL`** — usa ferramenta OSS consagrada (gosec, gremlins, errorlint, hadolint, actionlint, etc). Baixo falso positivo.
 - **`HEURISTIC`** — grep/regex baseado. Pode ter falso positivo/negativo, útil como sinal inicial. Vários emitem `[INFO]` em vez de `[FAIL]`.
 
-Dos 67 gates: ~35 são `FULL` (usam ferramenta especializada), ~32 são `HEURISTIC` (grep-based, melhores que nada e melhorar em v0.4+).
-
----
-
-## Como Funciona
-
-```mermaid
-graph TD
-    USER["dev"]
-    PRE["pre-commit hook<br/><i>categoria: core</i>"]
-    CI["CI / PR check<br/><i>categoria: all</i>"]
-    SLASH["/pr-quality-gates:<br/>quality-report"]
-    FILTER["Filtro por categoria<br/>PR_QUALITY_CATEGORIES"]
-    SEC["security (10)"]
-    QUA["quality (4)"]
-    ARC["architecture (8)"]
-    PER["performance (8)"]
-    REL["reliability (15)"]
-    OBS["observability (5)"]
-    OPE["operational (6)"]
-    DAT["data (5)"]
-    TES["testing (5)"]
-    COM["compliance (4)"]
-    RLE["release (4)"]
-    REPORT["Relatorio priorizado<br/>pelo Claude"]
-
-    USER --> PRE
-    USER --> SLASH
-    PRE --> FILTER
-    CI --> FILTER
-    SLASH --> FILTER
-    FILTER --> SEC
-    FILTER --> QUA
-    FILTER --> ARC
-    FILTER --> PER
-    FILTER --> REL
-    FILTER --> OBS
-    FILTER --> OPE
-    FILTER --> DAT
-    FILTER --> TES
-    FILTER --> COM
-    FILTER --> RLE
-    SEC -.falhas.-> REPORT
-    REL -.falhas.-> REPORT
-    QUA -.falhas.-> REPORT
-
-    style USER fill:#1A1612,color:#fff,stroke:none,rx:12
-    style PRE fill:#E8622C,color:#fff,stroke:none,rx:12
-    style CI fill:#E8622C,color:#fff,stroke:none,rx:12
-    style SLASH fill:#E8622C,color:#fff,stroke:none,rx:12
-    style FILTER fill:#B8860B,color:#fff,stroke:none,rx:12
-    style SEC fill:#C43D3D,color:#fff,stroke:none,rx:12
-    style REL fill:#C43D3D,color:#fff,stroke:none,rx:12
-    style QUA fill:#2B7BB5,color:#fff,stroke:none,rx:12
-    style ARC fill:#2B7BB5,color:#fff,stroke:none,rx:12
-    style PER fill:#7E44A8,color:#fff,stroke:none,rx:12
-    style OBS fill:#7E44A8,color:#fff,stroke:none,rx:12
-    style OPE fill:#7E44A8,color:#fff,stroke:none,rx:12
-    style DAT fill:#2D8E5E,color:#fff,stroke:none,rx:12
-    style TES fill:#2D8E5E,color:#fff,stroke:none,rx:12
-    style COM fill:#2D8E5E,color:#fff,stroke:none,rx:12
-    style RLE fill:#2D8E5E,color:#fff,stroke:none,rx:12
-    style REPORT fill:#1A1612,color:#fff,stroke:none,rx:12
-```
+Dos 101 gates: ~45 são `FULL` (ferramenta especializada), ~56 são `HEURISTIC`. Roadmap v0.5 upgrade dos heurísticos pra Go AST analyzers.
 
 ---
 
@@ -143,7 +87,7 @@ graph TD
 /plugin install pr-quality-gates@pr-quality-gates
 ```
 
-Ferramentas auxiliares são instaladas automaticamente na primeira execução via `go install` (cobrir ~30 tools: gosec, govulncheck, gitleaks, gocyclo, gremlins, errcheck, errorlint, contextcheck, bodyclose, fieldalignment, ineffassign, apidiff, cyclonedx-gomod, nilaway, benchstat).
+Ferramentas auxiliares são instaladas automaticamente na primeira execução via `go install`: gosec, govulncheck, gitleaks, gocyclo, gremlins, errcheck, errorlint, contextcheck, bodyclose, fieldalignment, ineffassign, apidiff, cyclonedx-gomod, nilaway, benchstat, revive (~16 tools Go + opcionais: hadolint, actionlint, tfsec, buf, helm).
 
 ---
 
@@ -155,14 +99,14 @@ Ferramentas auxiliares são instaladas automaticamente na primeira execução vi
 /pr-quality-gates:quality-report
 ```
 
-Roda 23 gates (security + reliability + quality). Rápido, alto sinal, ~3-8k tokens.
+23 gates (security + reliability + quality). ~3-8k tokens.
 
 ### Drill-down por categoria
 
 ```
-/pr-quality-gates:category-report reliability
-/pr-quality-gates:category-report performance
-/pr-quality-gates:category-report architecture
+/pr-quality-gates:category-report api
+/pr-quality-gates:category-report ai-ml
+/pr-quality-gates:category-report infrastructure
 ```
 
 ### Audit completo
@@ -171,7 +115,7 @@ Roda 23 gates (security + reliability + quality). Rápido, alto sinal, ~3-8k tok
 /pr-quality-gates:full-audit
 ```
 
-Todos os 67 gates. ~10-30k tokens — **usar com moderação**.
+Todos os 101 gates. ~15-40k tokens — **usar com moderação**.
 
 ### Baseline (legacy adoption)
 
@@ -180,14 +124,6 @@ Todos os 67 gates. ~10-30k tokens — **usar com moderação**.
 ```
 
 Congela violações atuais de CCN e module-size. Dali em diante, só novas falham.
-
-### Configuração
-
-`config/thresholds.json` — thresholds de cada gate (ccn_max, coverage_min, file_lines_max, escapes_max, etc)
-
-`config/categories.json` — default preset
-
-`config/depguard.yml` — regras de arquitetura (camadas)
 
 ---
 
@@ -198,7 +134,7 @@ Congela violações atuais de CCN e module-size. Dali em diante, só novas falha
 | `PR_QUALITY_CATEGORIES=all\|core\|<list>` | Quais categorias rodar |
 | `PR_QUALITY_BASELINE=1` | Modo captura (freeze estado atual) |
 | `PR_QUALITY_FULL=1` | Ignora baseline (audit de tudo) |
-| `BASE_REF=origin/main` | Ref para comparações (CHANGELOG, benchmark) |
+| `BASE_REF=origin/main` | Ref para comparações (CHANGELOG, PR size, etc) |
 
 ---
 
@@ -212,58 +148,67 @@ pr-quality-gates/
     baseline.sh                # ratchet mode
     categories.sh              # filtro + runner
   hooks/
-    pre-commit.sh              # roda categoria "core"
+    pre-commit.sh              # roda "core"
     pr-check.sh                # roda "all" (CI)
   gates/
-    security/      (10 gates)
-    quality/       (4 gates)
-    architecture/  (8 gates)
-    performance/   (8 gates)
-    reliability/   (15 gates)
-    observability/ (5 gates)
-    operational/   (6 gates)
-    data/          (5 gates)
-    testing/       (5 gates)
-    compliance/    (4 gates)
-    release/       (4 gates)
+    security/      (10)   quality/       (4)
+    architecture/  (8)    performance/   (8)
+    reliability/   (15)   observability/ (5)
+    operational/   (6)    data/          (5)
+    testing/       (5)    compliance/    (4)
+    release/       (4)    api/           (8)  *
+    infrastructure/(7)  * documentation/ (6)  *
+    git-hygiene/   (6)  * ai-ml/         (7)  *
   config/
-    thresholds.json
-    categories.json
-    depguard.yml
+    thresholds.json     categories.json    depguard.yml
   commands/
-    quality-report.md          # core
-    full-audit.md              # todos (token-heavy)
-    category-report.md         # 1 categoria
-    baseline-freeze.md         # freeze
+    quality-report.md      full-audit.md
+    category-report.md     baseline-freeze.md
 ```
+
+`*` = novo em v0.4.0
 
 ---
 
 ## Roadmap
 
-### v0.4 — upgrade de heurísticas para full
+### v0.5 — Precisão (HEURISTIC → FULL)
 
-Substituir gates `HEURISTIC` por analisadores Go AST nativos:
-- goroutine-leak, concurrent-map, cache-ttl, defer-close → pacote Go dedicado
-- Interface discipline, god struct → usa `go/types`
-- DI discipline → ast scanner
+Substituir gates `HEURISTIC` por analisadores Go AST nativos via `go/analysis`:
+- **reliability:** goroutine-leak, concurrent-map, cache-ttl, defer-close, unbounded-growth
+- **architecture:** interface-discipline, god-struct, di-discipline
+- **performance:** unbounded-loops, alloc-in-loop, sync-pool
+- **ai-ml:** prompt-injection (proper taint analysis), pii-in-prompts
+- **api:** rest-status-codes, idempotency
 
-### v0.5 — infra de escala
+Meta: 45 → 80 gates em modo `FULL` (baixo falso positivo).
 
-- **Diff-aware execution:** rodar só nas categorias afetadas pelo diff
-- **Paralelização:** 67 gates em paralelo no CI (~4x mais rápido)
+### v0.6 — Escala e performance do próprio plugin
+
+- **Diff-aware execution:** rodar só categorias afetadas pelo diff
+- **Paralelização:** 101 gates em paralelo no CI (~5x mais rápido)
 - **Dashboard histórico:** trend de cada categoria em JSON versionado
+- **Cache:** resultados de gates FULL cacheados por hash do AST
 
-### v0.6 — advisory tiers
+### v0.7 — Advisory tiers e PR integration
 
 - **BLOCKER / WARNING / INFO** severity levels configuráveis
 - **Override governado:** skip com justificativa obrigatória em audit log
 - **PR inline comments** no GitHub (estilo SonarCloud bot)
+- **Autofix bot** para categorias como git-hygiene (format commit message, split PR)
 
-### v0.7 — portabilidade
+### v0.8 — Categorias domain-specific (opt-in)
 
-- Suporte a **Python, TypeScript, Rust** (via plugins filhos)
+- **frontend** — se detectar React/Vue/Svelte: bundle size, tree shaking, CSS dead code, CSP, XSS
+- **mobile** — APK size, permissões justificadas, network state, battery drain
+- **accessibility** — WCAG AA, contraste, keyboard nav, screen reader, alt tags
+- **i18n** — hardcoded strings, timezone-awareness, unicode, RTL
+
+### v0.9 — Multi-linguagem
+
+- Suporte a **Python, TypeScript, Rust** via plugins filhos
 - Marketplace ecosystem: `pr-quality-gates-python`, `pr-quality-gates-rust`
+- Core framework (categorias + runner + baseline) compartilhado
 
 ---
 

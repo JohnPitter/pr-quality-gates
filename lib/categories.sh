@@ -14,6 +14,7 @@
 ALL_CATEGORIES=(
   security quality architecture performance reliability
   observability operational data testing compliance release
+  api infrastructure documentation git-hygiene ai-ml
 )
 
 CORE_CATEGORIES=(security reliability quality)

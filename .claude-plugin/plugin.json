@@ -1,7 +1,7 @@
 {
   "name": "pr-quality-gates",
-  "version": "0.3.0",
-  "description": "67-gate PR validation for Go projects across 11 categories: security, quality, architecture, performance, reliability, observability, operational, data, testing, compliance, release.",
+  "version": "0.4.0",
+  "description": "101-gate PR validation for Go across 16 categories including api, infrastructure, documentation, git-hygiene, and ai-ml.",
   "author": {
     "name": "JohnPitter",
     "url": "https://github.com/JohnPitter"

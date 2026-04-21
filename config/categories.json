@@ -12,6 +12,11 @@
     "data": "transactions, migrations, FKs",
     "testing": "negative paths, fuzz, property-based",
     "compliance": "data retention, audit, consent",
-    "release": "semver, signing, CHANGELOG"
+    "release": "semver, signing, CHANGELOG",
+    "api": "REST/gRPC/GraphQL correctness, OpenAPI, versioning",
+    "infrastructure": "Docker, K8s, Terraform, GitHub Actions, Helm",
+    "documentation": "README, godoc, ADR, CONTRIBUTING, runbooks",
+    "git-hygiene": "conventional commits, PR size, signing, large files",
+    "ai-ml": "prompt injection, LLM timeouts, model pinning, cost tracking"
   }
 }

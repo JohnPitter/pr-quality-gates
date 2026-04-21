@@ -8,6 +8,8 @@
   "interface_max_methods": 5,
   "struct_max_methods": 15,
   "escapes_max": 100,
+  "pr_max_lines": 1000,
+  "git_max_file_mb": 1,
   "scan_paths": ["./..."],
   "exemptions": {
     "file_lines_max": [],
