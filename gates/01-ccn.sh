@@ -4,6 +4,8 @@
 set -euo pipefail
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../lib/common.sh
+source "$PLUGIN_DIR/lib/common.sh"
 THRESHOLD="$(jq -r '.ccn_max' "$PLUGIN_DIR/config/thresholds.json")"
 
 echo "[gate:ccn] threshold=$THRESHOLD"

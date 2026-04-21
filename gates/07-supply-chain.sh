@@ -5,6 +5,8 @@
 set -euo pipefail
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../lib/common.sh
+source "$PLUGIN_DIR/lib/common.sh"
 MAX_CVSS="$(jq -r '.supply_chain_max_cvss // 7.0' "$PLUGIN_DIR/config/thresholds.json")"
 
 echo "[gate:supply-chain] max_cvss_without_patch=$MAX_CVSS"

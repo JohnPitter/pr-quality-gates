@@ -4,6 +4,8 @@
 set -euo pipefail
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../lib/common.sh
+source "$PLUGIN_DIR/lib/common.sh"
 MAX="$(jq -r '.file_lines_max' "$PLUGIN_DIR/config/thresholds.json")"
 EXEMPT="$(jq -r '.exemptions.file_lines_max[]' "$PLUGIN_DIR/config/thresholds.json" 2>/dev/null || true)"
 

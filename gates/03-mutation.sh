@@ -5,6 +5,8 @@
 set -euo pipefail
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../lib/common.sh
+source "$PLUGIN_DIR/lib/common.sh"
 MIN="$(jq -r '.mutation_min' "$PLUGIN_DIR/config/thresholds.json")"
 MIN_PCT="$(awk -v m="$MIN" 'BEGIN { printf "%.2f", m * 100 }')"
 
