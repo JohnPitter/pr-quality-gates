@@ -15,6 +15,7 @@
     "file_lines_max": [],
     "ccn_max": [],
     "sast_rules": [],
-    "secrets_paths": []
+    "secrets_paths": [],
+    "god_structs": []
   }
 }
