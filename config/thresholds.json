@@ -1,0 +1,11 @@
+{
+  "ccn_max": 10,
+  "coverage_min": 0.85,
+  "mutation_min": 0.65,
+  "file_lines_max": 300,
+  "scan_paths": ["./..."],
+  "exemptions": {
+    "file_lines_max": [],
+    "ccn_max": []
+  }
+}

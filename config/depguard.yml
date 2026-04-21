@@ -1,0 +1,32 @@
+linters-settings:
+  depguard:
+    rules:
+      layer-order:
+        # Arquitetura em camadas: api -> service -> domain -> infra
+        # Camadas inferiores NUNCA podem importar camadas superiores.
+        deny:
+          - pkg: "**/internal/api/**"
+            from:
+              - "**/internal/domain/**"
+              - "**/internal/infra/**"
+              - "**/internal/service/**"
+          - pkg: "**/internal/service/**"
+            from:
+              - "**/internal/domain/**"
+              - "**/internal/infra/**"
+          - pkg: "**/internal/domain/**"
+            from:
+              - "**/internal/infra/**"
+
+      no-impl-to-impl:
+        # Modulos de implementacao NAO podem chamar outros modulos de implementacao.
+        # Devem se comunicar apenas via interfaces (pacotes nao-impl).
+        deny:
+          - pkg: "**/impl/**"
+            from:
+              - "**/impl/**"
+
+linters:
+  enable:
+    - depguard
+    - gocyclic
