@@ -272,7 +272,7 @@ Roda `gitleaks` no repo inteiro + mudanças não commitadas. Detecta:
 Rode a suite completa e peça um relatório priorizado:
 
 ```
-/quality-report
+/pr-quality-gates:quality-report
 ```
 
 O Claude vai executar todos os gates, resumir cada violação em 1 linha, sugerir refactors concretos, e priorizar por impacto (alto/médio/baixo).
@@ -283,7 +283,8 @@ O Claude vai executar todos os gates, resumir cada violação em 1 linha, sugeri
 
 ```
 pr-quality-gates/
-  plugin.json                  # manifesto do plugin Claude Code
+  .claude-plugin/
+    plugin.json                # manifesto do plugin Claude Code
   hooks/
     pre-commit.sh              # gates rápidos (local)
     pr-check.sh                # suite completa (CI)

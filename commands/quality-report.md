@@ -1,17 +1,26 @@
 ---
-name: quality-report
-description: Roda a suite completa dos 5 gates de qualidade e pede ao Claude para explicar violacoes e sugerir refactors.
+description: Run all 8 PR quality gates and explain any failures with refactor suggestions.
+allowed-tools: Bash
 ---
 
-Execute o script `hooks/pr-check.sh` do plugin `pr-quality-gates` e, para cada gate que falhar:
+## Context
 
-1. Resuma a violacao em 1 linha (arquivo, metrica, valor atual vs threshold).
-2. Sugira uma acao de refactor concreta (extrair funcao, dividir arquivo, inverter dependencia).
-3. Priorize as violacoes por impacto (alto / medio / baixo) baseado em:
-   - Tamanho do arquivo/funcao afetado
-   - Criticidade do modulo (camada de dominio > infra > utils)
-   - Risco de regressao
+Run the complete 8-gate quality suite from the pr-quality-gates plugin:
 
-No final, liste os gates que passaram em uma linha cada. Nao entre em detalhes sobre os que passaram.
+!`bash "${CLAUDE_PLUGIN_ROOT}/hooks/pr-check.sh" 2>&1 || true`
 
-Se todos passarem, apenas reporte: "Todos os 5 gates OK - PR pronto para review."
+## Your task
+
+For each gate that failed:
+
+1. Summarize the violation in 1 line (file, metric, current value vs threshold)
+2. Suggest a concrete refactor action (extract function, split file, invert dependency, rotate secret, upgrade dep)
+3. Prioritize violations by impact (high / medium / low) based on:
+   - Size of the affected file/function
+   - Criticality of the module (domain layer > infra > utils)
+   - Security severity (secrets/CVEs/SAST always HIGH)
+   - Regression risk
+
+At the end, list the passing gates in one line each. Do not elaborate on passing gates.
+
+If all 8 pass, report: "All 8 gates OK — PR ready for review."
