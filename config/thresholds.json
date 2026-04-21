@@ -3,9 +3,13 @@
   "coverage_min": 0.85,
   "mutation_min": 0.65,
   "file_lines_max": 300,
+  "sast_min_severity": "HIGH",
+  "supply_chain_max_cvss": 7.0,
   "scan_paths": ["./..."],
   "exemptions": {
     "file_lines_max": [],
-    "ccn_max": []
+    "ccn_max": [],
+    "sast_rules": [],
+    "secrets_paths": []
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "pr-quality-gates",
-  "version": "0.1.0",
-  "description": "5-gate PR validation for Go projects: CCN, coverage, mutation, file size, coupling.",
+  "version": "0.2.0",
+  "description": "8-gate PR validation for Go projects: CCN, coverage, mutation, file size, coupling, SAST, supply chain, secrets.",
   "author": "JohnPitter",
   "license": "MIT",
   "hooks": {
