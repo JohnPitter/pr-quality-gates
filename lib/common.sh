@@ -8,6 +8,40 @@ set -euo pipefail
 # shellcheck source=./baseline.sh
 source "$(dirname "${BASH_SOURCE[0]}")/baseline.sh"
 
+# Load category filter helpers
+# shellcheck source=./categories.sh
+source "$(dirname "${BASH_SOURCE[0]}")/categories.sh"
+
+# PLUGIN_DIR convenience (2 levels up from lib/common.sh)
+PLUGIN_DIR="${PLUGIN_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+export PLUGIN_DIR
+
+# gate_header <category> <name> [threshold_desc]
+gate_header() {
+  local cat="$1" name="$2" thr="${3:-}"
+  if [ -n "$thr" ]; then
+    echo "[$cat:$name] $thr"
+  else
+    echo "[$cat:$name] running..."
+  fi
+}
+
+# gate_ok <category> <name> [detail]
+gate_ok() {
+  local cat="$1" name="$2" detail="${3:-OK}"
+  echo "[$cat:$name] $detail"
+}
+
+# gate_fail <category> <name> <reason>
+gate_fail() {
+  echo "[$1:$2] FAIL - $3"
+}
+
+# gate_info <category> <name> <msg>  (non-blocking, heuristic coverage)
+gate_info() {
+  echo "[$1:$2] INFO - $3"
+}
+
 # If real jq is present, nothing to do.
 if command -v jq >/dev/null 2>&1; then
   return 0 2>/dev/null || exit 0

@@ -1,29 +1,27 @@
 ---
-description: Run all 8 quality gates ignoring the baseline. Reports the TOTAL technical debt, not just new violations.
+description: Run ALL 67 gates across all 11 categories. High token cost — use sparingly.
 allowed-tools: Bash
 ---
 
 ## Context
 
-Full audit — runs the complete 8-gate suite with `PR_QUALITY_FULL=1`, which disables the baseline/ratchet filter. Every violation is reported, including those that were frozen via `/pr-quality-gates:baseline-freeze`.
+**TOKEN WARNING:** Full audit runs 67 gates across 11 categories. Output can be 10-30k tokens depending on violations found. Each violation the model explains costs additional tokens. Use this command for:
+- Quarterly tech debt review
+- Pre-release audit
+- Planning refactor sprints
+- After big architectural changes
 
-Use this to:
-- See the total technical debt in the codebase
-- Plan refactor sprints (which files/functions to tackle first)
-- Verify baseline still matches reality after big changes
+For daily PRs, use `/pr-quality-gates:quality-report` (core only, ~3-8k tokens).
 
-!`cd "$(pwd)" && PR_QUALITY_FULL=1 bash "${CLAUDE_PLUGIN_ROOT}/hooks/pr-check.sh" 2>&1 || true`
+!`cd "$(pwd)" && PR_QUALITY_CATEGORIES=all PR_QUALITY_FULL=1 bash "${CLAUDE_PLUGIN_ROOT}/hooks/pr-check.sh" 2>&1 || true`
 
 ## Your task
 
-Produce a technical debt report organized by gate:
+Produce a technical debt report organized by category:
 
-1. **Per gate with failures:** count of violations, top 5 worst offenders (highest CCN / largest file / most severe CVE / etc), and a 1-line refactor strategy
-2. **Prioritization matrix:** group violations into High / Medium / Low based on:
-   - Severity (secrets/SAST HIGH > CVEs > architecture > CCN > size)
-   - Criticality of the affected module (domain > infra > tests)
-   - Refactor effort vs impact ratio
-3. **Suggested sprint scope:** pick 3-5 violations that give the biggest quality improvement per hour of work
-4. **Delta vs baseline:** if `.pr-quality-gates-baseline/` exists, mention how many violations are baselined vs how many would be new today
+1. **Per category:** failure count, top 3 worst issues, 1-line refactor strategy per issue
+2. **Prioritization matrix:** High/Medium/Low by severity (secrets/SAST HIGH > CVEs > reliability > architecture > style)
+3. **Suggested sprint scope:** 5-10 violations with biggest quality-per-effort ratio
+4. **Delta vs baseline:** if `.pr-quality-gates-baseline/` exists, mention baselined vs new
 
-Keep it actionable — this is a planning document, not an inventory.
+Treat `[INFO]` lines as advisory context, not failures. Keep actionable — this is a planning document.

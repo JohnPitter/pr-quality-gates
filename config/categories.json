@@ -1,0 +1,17 @@
+{
+  "default": "core",
+  "presets": {
+    "all": "every gate — high token cost, full audit",
+    "core": "security + reliability + quality — blockers only",
+    "security": "SAST, supply chain, secrets, auth, DoS",
+    "reliability": "errors, concurrency, memory, cache, context",
+    "performance": "benchmarks, allocations, GC, I/O",
+    "architecture": "coupling, layering, DI, cohesion",
+    "observability": "logs, metrics, traces, PII, cost",
+    "operational": "health, graceful shutdown, retry, circuit breakers",
+    "data": "transactions, migrations, FKs",
+    "testing": "negative paths, fuzz, property-based",
+    "compliance": "data retention, audit, consent",
+    "release": "semver, signing, CHANGELOG"
+  }
+}

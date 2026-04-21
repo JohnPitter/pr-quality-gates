@@ -5,6 +5,9 @@
   "file_lines_max": 300,
   "sast_min_severity": "HIGH",
   "supply_chain_max_cvss": 7.0,
+  "interface_max_methods": 5,
+  "struct_max_methods": 15,
+  "escapes_max": 100,
   "scan_paths": ["./..."],
   "exemptions": {
     "file_lines_max": [],

@@ -1,26 +1,21 @@
 ---
-description: Run all 8 PR quality gates and explain any failures with refactor suggestions.
+description: Run core quality gates (security + reliability + quality) and explain failures.
 allowed-tools: Bash
 ---
 
 ## Context
 
-Run the complete 8-gate quality suite from the pr-quality-gates plugin:
+Runs the **core** category (~23 gates): security (10) + reliability (15) + quality (4). These are the blockers — fast, deterministic, high-signal.
 
-!`bash "${CLAUDE_PLUGIN_ROOT}/hooks/pr-check.sh" 2>&1 || true`
+**Token cost:** ~3-8k tokens depending on failures. For full audit (67 gates), use `/pr-quality-gates:full-audit`. For a single category, use `/pr-quality-gates:category-report <name>`.
+
+!`cd "$(pwd)" && PR_QUALITY_CATEGORIES=core bash "${CLAUDE_PLUGIN_ROOT}/hooks/pr-check.sh" 2>&1 || true`
 
 ## Your task
 
-For each gate that failed:
+For each failing gate:
+1. Summarize the violation in 1 line
+2. Suggest a concrete refactor (extract function, add timeout, wrap error with %w, rotate secret)
+3. Prioritize by impact (high = security/reliability breakers, medium = architecture, low = style)
 
-1. Summarize the violation in 1 line (file, metric, current value vs threshold)
-2. Suggest a concrete refactor action (extract function, split file, invert dependency, rotate secret, upgrade dep)
-3. Prioritize violations by impact (high / medium / low) based on:
-   - Size of the affected file/function
-   - Criticality of the module (domain layer > infra > utils)
-   - Security severity (secrets/CVEs/SAST always HIGH)
-   - Regression risk
-
-At the end, list the passing gates in one line each. Do not elaborate on passing gates.
-
-If all 8 pass, report: "All 8 gates OK — PR ready for review."
+Treat `[INFO]` lines as advisory — do not report them as failures. If all core gates pass, report: "Core gates OK — PR ready for review. Run `/pr-quality-gates:full-audit` for broader check."
