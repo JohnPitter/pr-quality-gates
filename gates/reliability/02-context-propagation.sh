@@ -8,9 +8,10 @@ GATE="context-propagation"; CAT="reliability"
 gate_header "$CAT" "$GATE"
 
 command -v contextcheck >/dev/null 2>&1 || go install github.com/kkHAIKE/contextcheck/cmd/contextcheck@latest
-# Exclude test files. Also exclude main.go (Wails hooks have a fixed signature
-# that doesn't propagate context the way contextcheck expects).
-OUT="$(contextcheck ./... 2>&1 | grep -E '\.go:' | grep -v '_test\.go' | grep -v '/main\.go:' | head -20 || true)"
+# Exclude test files. Also exclude main.go (Wails/framework hooks have
+# fixed signatures that don't propagate context the way contextcheck
+# expects). Match both unix (/) and windows (\) path separators.
+OUT="$(contextcheck ./... 2>&1 | grep -E '\.go:' | grep -v '_test\.go' | grep -Ev '[\\/]main(_[a-z]+)?\.go:' | head -20 || true)"
 if [ -n "$OUT" ]; then
   COUNT="$(echo "$OUT" | wc -l | tr -d ' ')"
   gate_fail "$CAT" "$GATE" "$COUNT violacao(oes) de ctx propagation:"
