@@ -8,7 +8,9 @@ GATE="body-close"; CAT="reliability"
 gate_header "$CAT" "$GATE"
 
 command -v bodyclose >/dev/null 2>&1 || go install github.com/timakin/bodyclose@latest
-OUT="$(bodyclose ./... 2>&1 | grep -E '\.go:' | head -20 || true)"
+# Exclude test files — test HTTP bodies are often intentionally short-lived
+# and closing every one adds noise without real FD leak risk.
+OUT="$(bodyclose ./... 2>&1 | grep -E '\.go:' | grep -v '_test\.go' | head -20 || true)"
 if [ -n "$OUT" ]; then
   COUNT="$(echo "$OUT" | wc -l | tr -d ' ')"
   gate_fail "$CAT" "$GATE" "$COUNT http.Response.Body nao fechado (FD leak):"

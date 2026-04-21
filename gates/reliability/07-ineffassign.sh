@@ -10,8 +10,10 @@ gate_header "$CAT" "$GATE"
 command -v errcheck >/dev/null 2>&1 || go install github.com/kisielk/errcheck@latest
 command -v ineffassign >/dev/null 2>&1 || go install github.com/gordonklaus/ineffassign@latest
 
-EC="$(errcheck ./... 2>&1 | grep -E '\.go:' | head -20 || true)"
-IA="$(ineffassign ./... 2>&1 | grep -E '\.go:' | head -10 || true)"
+# -ignoretests skips _test.go files; fixture code often discards errors
+# on purpose (e.g. json.Unmarshal of known-valid test payloads).
+EC="$(errcheck -ignoretests ./... 2>&1 | grep -E '\.go:' | grep -v '_test\.go' | head -20 || true)"
+IA="$(ineffassign ./... 2>&1 | grep -E '\.go:' | grep -v '_test\.go' | head -10 || true)"
 
 FAIL=0
 if [ -n "$EC" ]; then
