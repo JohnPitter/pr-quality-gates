@@ -13,7 +13,11 @@ gate_header "$CAT" "$GATE" "threshold=$THRESHOLD"
 
 command -v gocyclo >/dev/null 2>&1 || go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
 
-RAW="$(gocyclo -over "$THRESHOLD" . || true)"
+# Exclude test files — production code is what we gate on. Test functions
+# can legitimately be complex (table-driven, many scenarios).
+RAW="$(gocyclo -over "$THRESHOLD" -ignore '_test\.go$' . 2>/dev/null || true)"
+# Fallback if older gocyclo without -ignore: grep-filter.
+[ -z "$RAW" ] && RAW="$(gocyclo -over "$THRESHOLD" . 2>/dev/null | grep -v '_test\.go' || true)"
 [ -z "$RAW" ] && { gate_ok "$CAT" "$GATE"; exit 0; }
 
 WITH_SIGS="$(echo "$RAW" | awk '{loc=$4; sub(/:[0-9]+:[0-9]+$/, "", loc); printf "%s %s %s\t%s\n", $2, $3, loc, $0}')"
