@@ -9,7 +9,20 @@ GATE="secrets"; CAT="security"
 gate_header "$CAT" "$GATE"
 command -v gitleaks >/dev/null 2>&1 || go install github.com/zricethezav/gitleaks/v8@latest
 REP="$(mktemp)"; trap 'rm -f "$REP"' EXIT
-gitleaks detect --no-banner --redact --report-format json --report-path "$REP" --exit-code 0 >/dev/null 2>&1 || true
+
+# Find the nearest .gitleaks.toml walking up from cwd (respects Go-module-in-
+# subdirectory layouts where the config lives at the repo root).
+CONFIG_FLAG=""
+SEARCH_DIR="$(pwd)"
+while [ "$SEARCH_DIR" != "/" ] && [ -n "$SEARCH_DIR" ]; do
+  if [ -f "$SEARCH_DIR/.gitleaks.toml" ]; then
+    CONFIG_FLAG="-c $SEARCH_DIR/.gitleaks.toml"
+    break
+  fi
+  SEARCH_DIR="$(dirname "$SEARCH_DIR")"
+done
+
+gitleaks detect $CONFIG_FLAG --no-banner --redact --report-format json --report-path "$REP" --exit-code 0 >/dev/null 2>&1 || true
 LEAKS="$(jq 'length' "$REP" 2>/dev/null || echo 0)"
 if [ "$LEAKS" -gt 0 ]; then
   gate_fail "$CAT" "$GATE" "$LEAKS secret(s) detectado(s)"
