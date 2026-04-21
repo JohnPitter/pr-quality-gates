@@ -6,7 +6,7 @@
 
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-E8622C?style=flat-square)](https://claude.com/claude-code)
-[![Version](https://img.shields.io/badge/Version-0.2.0-2D8E5E?style=flat-square)](#)
+[![Version](https://img.shields.io/badge/Version-0.2.1-2D8E5E?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=flat-square)](#license)
 
 [Features](#features) · [Como Funciona](#como-funciona) · [Instalação](#instalação) · [Configuração](#configuração) · [Gates](#gates) · [Roadmap](#roadmap)
@@ -279,20 +279,65 @@ O Claude vai executar todos os gates, resumir cada violação em 1 linha, sugeri
 
 ---
 
+## Baseline (Ratchet Mode)
+
+**Problema:** adotar o plugin num codebase legado bloqueia 100% dos PRs até refatorar tudo.
+
+**Solução:** baseline incremental — congela o estado atual como "dívida técnica aceita" e só falha em violações **novas**. Cada refactor encolhe o baseline; a lista nunca cresce.
+
+### Congelar o estado atual
+
+```
+/pr-quality-gates:baseline-freeze
+```
+
+Ou manualmente:
+
+```bash
+PR_QUALITY_BASELINE=1 bash gates/01-ccn.sh
+PR_QUALITY_BASELINE=1 bash gates/04-module-size.sh
+```
+
+Isso cria `.pr-quality-gates-baseline/` com um arquivo por gate. **Commite esse diretório no repo** — é o registro compartilhado da dívida técnica.
+
+### Como funciona
+
+- **Gate 1 (CCN):** assinatura = `<pkg> <func> <file>` (CCN stripped). Função já no baseline não falha mesmo se CCN mudar. Função nova com CCN > threshold falha.
+- **Gate 4 (tamanho):** assinatura = caminho do arquivo. Arquivo já no baseline não falha mesmo se crescer um pouco. Arquivo novo > 300 linhas falha.
+
+### Gates que **não** suportam baseline (por design)
+
+- **Gate 8 (secrets):** sempre falha. Secrets nunca podem existir no repo, nem mesmo em legado.
+- **Gate 2/3/7 (coverage/mutation/supply-chain):** métricas globais, não listas discretas. Baseline "não piorar" virá em v0.2.2.
+
+### Fluxo recomendado
+
+1. Instalar o plugin
+2. Rodar `/pr-quality-gates:baseline-freeze`
+3. Commitar `.pr-quality-gates-baseline/`
+4. Abrir uma issue/epic pra rastrear redução do baseline
+5. Cada PR de refactor **reduz** o baseline (remover linhas correspondentes do `.txt`)
+6. CI garante que ninguém **adiciona** ao baseline
+
+---
+
 ## Estrutura
 
 ```
 pr-quality-gates/
   .claude-plugin/
     plugin.json                # manifesto do plugin Claude Code
+  lib/
+    common.sh                  # bootstrap (jq/gojq) + source de helpers
+    baseline.sh                # ratchet mode (congelar estado atual)
   hooks/
     pre-commit.sh              # gates rápidos (local)
     pr-check.sh                # suite completa (CI)
   gates/
-    01-ccn.sh                  # complexidade ciclomática
+    01-ccn.sh                  # complexidade ciclomática (baseline-aware)
     02-coverage.sh             # cobertura de testes
     03-mutation.sh             # mutação de testes
-    04-module-size.sh          # tamanho de módulos
+    04-module-size.sh          # tamanho de módulos (baseline-aware)
     05-coupling.sh             # acoplamento de dependências
     06-sast.sh                 # SAST (gosec)
     07-supply-chain.sh         # supply chain (govulncheck + osv-scanner)
@@ -302,6 +347,7 @@ pr-quality-gates/
     depguard.yml               # regras de camadas
   commands/
     quality-report.md          # slash command /quality-report
+    baseline-freeze.md         # slash command /baseline-freeze
   .github/workflows/
     pr-check.yml               # GitHub Actions
 ```

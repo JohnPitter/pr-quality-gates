@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 # Shared bootstrap for all gates.
-# Ensures jq (or gojq as drop-in replacement) is available before running.
+# Ensures jq (or gojq as drop-in replacement) is available before running,
+# and exposes baseline (ratchet) helpers.
 set -euo pipefail
+
+# Load baseline helpers (no-op if not used by the gate)
+# shellcheck source=./baseline.sh
+source "$(dirname "${BASH_SOURCE[0]}")/baseline.sh"
 
 # If real jq is present, nothing to do.
 if command -v jq >/dev/null 2>&1; then
