@@ -8,8 +8,9 @@ GATE="escape-analysis"; CAT="performance"
 MAX="$(jq -r '.escapes_max // 100' "$PLUGIN_DIR/config/thresholds.json")"
 gate_header "$CAT" "$GATE" "max escapes=$MAX"
 
-ESC="$(go build -gcflags='-m' ./... 2>&1 | grep -c 'escapes to heap' || echo 0)"
-if [ "$ESC" -gt "$MAX" ]; then
+ESC="$(go build -gcflags='-m' ./... 2>&1 | grep -c 'escapes to heap' 2>/dev/null | head -1 | tr -d '\n ')"
+ESC="${ESC:-0}"
+if [ "$ESC" -gt "$MAX" ] 2>/dev/null; then
   gate_fail "$CAT" "$GATE" "$ESC allocations escapam pra heap (max $MAX)"
   go build -gcflags='-m' ./... 2>&1 | grep 'escapes to heap' | head -10 | sed 's/^/  /'
   echo "  sugestao: retornar por valor em hot paths, evitar interface{} desnecessario"

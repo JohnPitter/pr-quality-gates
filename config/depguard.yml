@@ -1,32 +1,23 @@
-linters-settings:
-  depguard:
-    rules:
-      layer-order:
-        # Arquitetura em camadas: api -> service -> domain -> infra
-        # Camadas inferiores NUNCA podem importar camadas superiores.
-        deny:
-          - pkg: "**/internal/api/**"
-            from:
-              - "**/internal/domain/**"
-              - "**/internal/infra/**"
-              - "**/internal/service/**"
-          - pkg: "**/internal/service/**"
-            from:
-              - "**/internal/domain/**"
-              - "**/internal/infra/**"
-          - pkg: "**/internal/domain/**"
-            from:
-              - "**/internal/infra/**"
-
-      no-impl-to-impl:
-        # Modulos de implementacao NAO podem chamar outros modulos de implementacao.
-        # Devem se comunicar apenas via interfaces (pacotes nao-impl).
-        deny:
-          - pkg: "**/impl/**"
-            from:
-              - "**/impl/**"
+version: "2"
 
 linters:
+  default: none
   enable:
     - depguard
-    - gocyclic
+  settings:
+    depguard:
+      rules:
+        layer-order:
+          # Arquitetura em camadas: api -> service -> domain -> infra.
+          # Camadas inferiores NUNCA podem importar camadas superiores.
+          deny:
+            - pkg: "**/internal/api/**"
+              desc: "layer violation: api should not be imported by lower layers"
+            - pkg: "**/internal/service/**"
+              desc: "layer violation: service should not be imported by domain/infra"
+        no-impl-to-impl:
+          # Modulos de implementacao NAO podem chamar outros modulos de impl direto.
+          # Devem se comunicar apenas via interfaces.
+          deny:
+            - pkg: "**/impl/**"
+              desc: "impl-to-impl coupling: use interfaces between implementation packages"

@@ -10,8 +10,9 @@ gate_header "$CAT" "$GATE" "min_severity=$SEV"
 command -v gosec >/dev/null 2>&1 || go install github.com/securego/gosec/v2/cmd/gosec@latest
 REP="$(mktemp)"; trap 'rm -f "$REP"' EXIT
 gosec -severity "$(echo "$SEV" | tr '[:upper:]' '[:lower:]')" -confidence medium -fmt json -out "$REP" -quiet ./... 2>/dev/null || true
-N="$(jq -r '.Issues | length' "$REP" 2>/dev/null || echo 0)"
-if [ "$N" -gt 0 ]; then
+N="$(jq -r '.Issues | length' "$REP" 2>/dev/null | head -1 | tr -d '\n ' || echo 0)"
+N="${N:-0}"
+if [ "$N" -gt 0 ] 2>/dev/null; then
   gate_fail "$CAT" "$GATE" "$N vulnerabilidade(s)"
   jq -r '.Issues[] | "  [\(.severity)/\(.confidence)] \(.rule_id) \(.file):\(.line) - \(.details)"' "$REP"
   exit 1

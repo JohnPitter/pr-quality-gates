@@ -1,0 +1,4 @@
+# Default gitleaks rules from upstream.
+# Project-local allowlists should live in the consumer repo's .gitleaks.toml.
+[extend]
+useDefault = true

@@ -2,7 +2,6 @@
 # Documentation 02: godoc coverage em simbolos exportados
 # Coverage: FULL (revive)
 set -euo pipefail
-PLUGIN_DIR="$(cd "$(dirname "["${BASH_SOURCE[0]}"")/../.." && pwd)" 2>/dev/null || \
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="godoc-coverage"; CAT="documentation"
