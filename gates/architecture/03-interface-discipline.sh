@@ -5,7 +5,8 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="interface-discipline"; CAT="architecture"
-MAX="$(jq -r '.interface_max_methods // 5' "$PLUGIN_DIR/config/thresholds.json")"
+MAX="$(threshold_get interface_max_methods)"
+[ -z "$MAX" ] && MAX=5
 gate_header "$CAT" "$GATE" "max metodos/interface=$MAX"
 
 VIOL=""

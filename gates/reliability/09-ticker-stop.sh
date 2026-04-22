@@ -12,7 +12,9 @@ ISSUES=0
 while IFS= read -r line; do
   [ -z "$line" ] && continue
   file="$(echo "$line" | cut -d: -f1)"
-  var="$(echo "$line" | grep -oE '^\s*[a-z][A-Za-z0-9_]+' | head -1 | tr -d ' ')"
+  # Extract var from the code portion, not from the `file:line:` prefix.
+  content="$(echo "$line" | cut -d: -f3- | sed 's/^[[:space:]]*//')"
+  var="$(echo "$content" | grep -oE '^[a-z][A-Za-z0-9_]*' | head -1)"
   [ -z "$var" ] && continue
   if ! grep -qE "defer\s+$var\.Stop\(\)|$var\.Stop\(\)" "$file" 2>/dev/null; then
     [ "$ISSUES" = "0" ] && gate_fail "$CAT" "$GATE" "ticker/timer sem Stop():"

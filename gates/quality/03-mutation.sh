@@ -5,7 +5,7 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="mutation"; CAT="quality"
-MIN="$(jq -r '.mutation_min' "$PLUGIN_DIR/config/thresholds.json")"
+MIN="$(threshold_get mutation_min)"
 MIN_PCT="$(awk -v m="$MIN" 'BEGIN{printf "%.2f", m*100}')"
 gate_header "$CAT" "$GATE" "threshold=${MIN_PCT}%"
 command -v gremlins >/dev/null 2>&1 || go install github.com/go-gremlins/gremlins/cmd/gremlins@latest

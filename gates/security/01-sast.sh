@@ -5,7 +5,8 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="sast"; CAT="security"
-SEV="$(jq -r '.sast_min_severity // "HIGH"' "$PLUGIN_DIR/config/thresholds.json")"
+SEV="$(threshold_get sast_min_severity)"
+[ -z "$SEV" ] && SEV="HIGH"
 gate_header "$CAT" "$GATE" "min_severity=$SEV"
 command -v gosec >/dev/null 2>&1 || go install github.com/securego/gosec/v2/cmd/gosec@latest
 REP="$(mktemp)"; trap 'rm -f "$REP"' EXIT

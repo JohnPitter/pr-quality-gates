@@ -10,6 +10,11 @@ gate_header "$CAT" "$GATE"
 HAS_HTTP="$(grep -rEl 'http\.(Handle|HandlerFunc)' --include='*.go' --exclude-dir=vendor . 2>/dev/null | head -1 || true)"
 [ -z "$HAS_HTTP" ] && { gate_ok "$CAT" "$GATE" "sem HTTP API"; exit 0; }
 
+# Skip when project is a non-public HTTP consumer (desktop with localhost relay,
+# internal microservice, etc.). Set via .pr-quality-gates.json -> api_openapi_skip.
+SKIP="$(threshold_get api_openapi_skip)"
+[ "$SKIP" = "true" ] && { gate_ok "$CAT" "$GATE" "skip (api_openapi_skip=true)"; exit 0; }
+
 SPEC="$(find . -maxdepth 3 -type f \( -name "openapi.yaml" -o -name "openapi.yml" -o -name "openapi.json" -o -name "swagger.yaml" -o -name "api.yaml" \) -not -path '*/vendor/*' -not -path '*/node_modules/*' 2>/dev/null | head -1 || true)"
 
 if [ -z "$SPEC" ]; then

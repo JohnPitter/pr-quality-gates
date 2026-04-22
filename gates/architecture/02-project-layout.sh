@@ -15,9 +15,13 @@ if [ "$FILE_COUNT" -gt 5 ]; then
   [ -d cmd ] || [ -d internal ] || [ -d pkg ] || ISSUES+=("projeto com $FILE_COUNT arquivos mas sem cmd/, internal/ ou pkg/")
 fi
 
-# Detect top-level .go files (besides main.go) which should be in packages
+# Detect top-level .go files (besides main.go) which should be in packages.
+# Override via .pr-quality-gates.json -> project_layout_max_top_files (default 3).
+# Desktop/Wails apps legitimately need bindings at the root for framework exposure.
 TOP_GO="$(find . -maxdepth 1 -name "*.go" -not -name "main.go" -not -name "*_test.go" 2>/dev/null | wc -l | tr -d ' ')"
-[ "$TOP_GO" -gt 3 ] && ISSUES+=("$TOP_GO arquivos .go no root (exceto main.go) - mover pra pacote")
+LIMIT_TOP="$(threshold_get project_layout_max_top_files)"
+[ -z "$LIMIT_TOP" ] && LIMIT_TOP=3
+[ "$TOP_GO" -gt "$LIMIT_TOP" ] && ISSUES+=("$TOP_GO arquivos .go no root (exceto main.go) - mover pra pacote (max=$LIMIT_TOP)")
 
 if [ "${#ISSUES[@]}" -gt 0 ]; then
   gate_fail "$CAT" "$GATE" "layout nao-padrao:"

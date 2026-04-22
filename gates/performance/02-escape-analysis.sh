@@ -5,7 +5,8 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="escape-analysis"; CAT="performance"
-MAX="$(jq -r '.escapes_max // 100' "$PLUGIN_DIR/config/thresholds.json")"
+MAX="$(threshold_get escapes_max)"
+[ -z "$MAX" ] && MAX=100
 gate_header "$CAT" "$GATE" "max escapes=$MAX"
 
 ESC="$(go build -gcflags='-m' ./... 2>&1 | grep -c 'escapes to heap' 2>/dev/null | head -1 | tr -d '\n ')"

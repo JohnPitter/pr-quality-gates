@@ -8,7 +8,7 @@ PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 
 GATE="ccn"; CAT="quality"
-THRESHOLD="$(jq -r '.ccn_max' "$PLUGIN_DIR/config/thresholds.json")"
+THRESHOLD="$(threshold_get ccn_max)"
 gate_header "$CAT" "$GATE" "threshold=$THRESHOLD"
 
 command -v gocyclo >/dev/null 2>&1 || go install github.com/fzipp/gocyclo/cmd/gocyclo@latest

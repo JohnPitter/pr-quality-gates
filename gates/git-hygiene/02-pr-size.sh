@@ -5,7 +5,8 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="pr-size"; CAT="git-hygiene"
-MAX="$(jq -r '.pr_max_lines // 1000' "$PLUGIN_DIR/config/thresholds.json")"
+MAX="$(threshold_get pr_max_lines)"
+[ -z "$MAX" ] && MAX=1000
 gate_header "$CAT" "$GATE" "max LoC/PR=$MAX"
 
 [ -d .git ] || { gate_ok "$CAT" "$GATE" "sem git"; exit 0; }

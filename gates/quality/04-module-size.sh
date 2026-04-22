@@ -5,8 +5,8 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="module-size"; CAT="quality"
-MAX="$(jq -r '.file_lines_max' "$PLUGIN_DIR/config/thresholds.json")"
-EXEMPT="$(jq -r '.exemptions.file_lines_max[]' "$PLUGIN_DIR/config/thresholds.json" 2>/dev/null || true)"
+MAX="$(threshold_get file_lines_max)"
+EXEMPT="$(exemption_list file_lines_max)"
 gate_header "$CAT" "$GATE" "threshold=${MAX} linhas/arquivo"
 RAW=""
 while IFS= read -r -d '' file; do

@@ -8,7 +8,8 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="god-struct"; CAT="architecture"
-MAX="$(jq -r '.struct_max_methods // 15' "$PLUGIN_DIR/config/thresholds.json")"
+MAX="$(threshold_get struct_max_methods)"
+[ -z "$MAX" ] && MAX=15
 EXEMPT="$(exemption_list god_structs)"
 gate_header "$CAT" "$GATE" "max metodos/struct=$MAX"
 

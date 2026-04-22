@@ -5,7 +5,8 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="large-files"; CAT="git-hygiene"
-MAX_MB="$(jq -r '.git_max_file_mb // 1' "$PLUGIN_DIR/config/thresholds.json")"
+MAX_MB="$(threshold_get git_max_file_mb)"
+[ -z "$MAX_MB" ] && MAX_MB=1
 MAX=$((MAX_MB * 1024 * 1024))
 gate_header "$CAT" "$GATE" "max=${MAX_MB}MB por arquivo"
 

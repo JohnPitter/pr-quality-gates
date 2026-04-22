@@ -5,7 +5,7 @@ set -euo pipefail
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$PLUGIN_DIR/lib/common.sh"
 GATE="coverage"; CAT="quality"
-MIN="$(jq -r '.coverage_min' "$PLUGIN_DIR/config/thresholds.json")"
+MIN="$(threshold_get coverage_min)"
 MIN_PCT="$(awk -v m="$MIN" 'BEGIN{printf "%.2f", m*100}')"
 gate_header "$CAT" "$GATE" "threshold=${MIN_PCT}%"
 # NOTE: Do NOT use a shell variable named TMP/TMPDIR — on Windows Git Bash,

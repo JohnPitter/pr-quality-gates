@@ -16,12 +16,16 @@ if [ -n "$BAD" ]; then
   # Info-level: not blocking, just advisory
 fi
 
-# fmt.Errorf without %w = losing error chain
-NOWRAP="$(grep -rn 'fmt\.Errorf(' --include='*.go' --exclude='*_test.go' --exclude-dir=vendor . 2>/dev/null | grep -v '%w' | head -10 || true)"
+# fmt.Errorf without %w and without a preceding call — tolerate "origin" errors
+# (where there is no upstream err to wrap). Threshold is configurable per-project
+# via .pr-quality-gates.json -> error_taxonomy_max_nowrap (default 5).
+NOWRAP="$(grep -rn 'fmt\.Errorf(' --include='*.go' --exclude='*_test.go' --exclude-dir=vendor . 2>/dev/null | grep -v '%w' || true)"
+LIMIT="$(threshold_get error_taxonomy_max_nowrap)"
+[ -z "$LIMIT" ] && LIMIT=5
 if [ -n "$NOWRAP" ]; then
   COUNT="$(echo "$NOWRAP" | wc -l | tr -d ' ')"
-  if [ "$COUNT" -gt 5 ]; then
-    gate_fail "$CAT" "$GATE" "$COUNT fmt.Errorf sem %w (perde chain de erro)"
+  if [ "$COUNT" -gt "$LIMIT" ]; then
+    gate_fail "$CAT" "$GATE" "$COUNT fmt.Errorf sem %w (perde chain de erro, max=$LIMIT)"
     echo "$NOWRAP" | sed 's/^/  /' | head -10
     exit 1
   fi
